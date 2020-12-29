@@ -6,7 +6,6 @@
 #include <chrono>
 #include <vector>
 
-
 namespace IO
 {
 	class Input
@@ -26,7 +25,7 @@ namespace IO
 				m_KeyHeldPrev[i] = false;
 				m_KeyHeldOnce[i] = false;
 
-				m_ClassicKeyDown[i] = false;
+				m_RepeatKeyDown[i] = false;
 				
 
 				m_KeyDownDuration[i] = 0.0f;
@@ -43,7 +42,7 @@ namespace IO
 			m_GetKeys(m_KeyStates);
 			m_IsAnyKeyPressed = false;
 			
-			bool ClassKeyPressed = false;
+			bool RepeatKeyPressed = false;
 			m_PressedKeys.clear();
 
 			for (int i = 0; i < 256; i++)
@@ -60,13 +59,13 @@ namespace IO
 					if (m_KeyStates[i] != m_OldKeyStates[i])
 					{
 						m_KeyPressed[i] = true;
-						m_ClassicKeyDown[i] = true; // Key type that detects single key press... waits a little bit and then sends them as fast as possible
-						ClassKeyPressed = true;
+						m_RepeatKeyDown[i] = true; // Key type that detects single key press... waits a little bit and then sends them as fast as possible
+						RepeatKeyPressed = true;
 					}
 					else
 					{
 						m_KeyPressed[i] = false;
-						m_ClassicKeyDown[i] = false; // Key type that detects single key press... waits a little bit and then sends them as fast as possible
+						m_RepeatKeyDown[i] = false; // Key type that detects single key press... waits a little bit and then sends them as fast as possible
 					}
 					
 					/*-----------DETECTS SINGLE KEY HELD EVENT----------*/
@@ -74,7 +73,7 @@ namespace IO
 					if (m_KeyDownDuration[i] >= m_HoldTime)
 					{
 						m_KeyHeld[i] = true;
-						m_ClassicKeyDown[i] = true;
+						m_RepeatKeyDown[i] = true;
 						
 						if (m_KeyHeld[i] != m_KeyHeldPrev[i])
 						{
@@ -91,7 +90,7 @@ namespace IO
 					m_KeyHeld[i] = false;
 					m_KeyDown[i] = false;
 
-					m_ClassicKeyDown[i] = false;
+					m_RepeatKeyDown[i] = false;
 
 					m_KeyDownDuration[i] = 0.0f;
 
@@ -150,9 +149,9 @@ namespace IO
 			return m_KeyHeldOnce[KeyCode];
 		}
 		
-		inline const bool GetClassicKeyDown(int KeyCode) const
+		inline const bool GetRepeatKeyDown(int KeyCode) const
 		{
-			return m_ClassicKeyDown[KeyCode];
+			return m_RepeatKeyDown[KeyCode];
 		}
 
 		inline const std::vector<unsigned char>& GetPressedKeys() const { return m_PressedKeys; }
@@ -264,7 +263,7 @@ namespace IO
 			}
 		}
 
-		inline void ChangeHoldTime(float NewTime) { m_HoldTime = NewTime; }
+		inline void ChangeHoldTime(float seconds) { m_HoldTime = seconds; }
 
 
 	private:
@@ -283,7 +282,7 @@ namespace IO
 		bool m_KeyHeldPrev[256];
 		bool m_KeyHeldOnce[256];
 
-		bool m_ClassicKeyDown[256]; // Key type that detects single key press... waits a little bit and then sends them as fast as possible
+		bool m_RepeatKeyDown[256]; // Key type that detects single key press... waits a little bit and then sends them as fast as possible
 
 		float m_KeyDownDuration[256];
 
