@@ -1,5 +1,4 @@
 #pragma once
-
 #include <string>
 #include <memory>
 #include <Windows.h>
@@ -29,6 +28,7 @@ namespace IO
 				
 
 				m_KeyDownDuration[i] = 0.0f;
+				m_KeyDownIntrevelDuration[i] = 0.0f;
 			}
 
 			m_Start = std::chrono::high_resolution_clock::now();
@@ -68,8 +68,10 @@ namespace IO
 						m_RepeatKeyDown[i] = false; // Key type that detects single key press... waits a little bit and then sends them as fast as possible
 					}
 					
+					m_KeyDownIntrevelDuration[i] += m_GetTime(m_Start, std::chrono::high_resolution_clock::now()).count();
 					/*-----------DETECTS SINGLE KEY HELD EVENT----------*/
 					m_KeyDownDuration[i] += m_GetTime(m_Start, std::chrono::high_resolution_clock::now()).count();
+					
 					if (m_KeyDownDuration[i] >= m_HoldTime)
 					{
 						m_KeyHeld[i] = true;
@@ -110,48 +112,33 @@ namespace IO
 			m_Start = std::chrono::high_resolution_clock::now();
 		}
 
-		inline const bool GetKey(int KeyCode) const
-		{
-			return m_KeyDown[KeyCode];
-		}
+		inline const bool GetKey(int KeyCode) const {return m_KeyDown[KeyCode]; }
 
-		inline const bool GetKeyUp(int KeyCode) const
-		{
-			return m_KeyRelease[KeyCode];
-		}
+		inline const bool GetKeyUp(int KeyCode) const {return m_KeyRelease[KeyCode]; }
 
-		inline const bool GetKeyDown(int KeyCode) const
+		inline const bool GetKeyDown(int KeyCode) const{ return m_KeyPressed[KeyCode]; }
+		
+		inline const bool GetAnyKey() const { return m_IsAnyKeyPressed;}
+
+		inline const bool GetKeyBeingHeld(int KeyCode, float seconds) const { return m_KeyDownDuration[KeyCode] >= seconds; }
+		
+		inline const bool GetKeyBeingHeld(int KeyCode) const { return m_KeyHeld[KeyCode]; }
+
+		inline const float GetKeyHeldDur(int KeyCode) const { return m_KeyDownDuration[KeyCode]; }
+
+		inline const bool GetKeyHeld(int KeyCode) const { return m_KeyHeldOnce[KeyCode]; }
+		
+		inline const bool GetRepeatKeyDown(int KeyCode) const { return m_RepeatKeyDown[KeyCode]; }
+
+		inline const bool GetRepeatKeyDown(int KeyCode, float seconds)
 		{
+			if (m_KeyDownIntrevelDuration[KeyCode] >= seconds)
+			{
+				m_KeyDownIntrevelDuration[KeyCode] = 0.0f;
+				return m_RepeatKeyDown[KeyCode];
+			}
+
 			return m_KeyPressed[KeyCode];
-		}
-		
-		inline const bool GetAnyKey() const
-		{
-			return m_IsAnyKeyPressed;
-		}
-
-		inline const bool GetKeyBeingHeld(int KeyCode, float seconds) const
-		{
-			return m_KeyDownDuration[KeyCode] >= seconds;
-		}
-		inline const bool GetKeyBeingHeld(int KeyCode) const
-		{
-			return m_KeyHeld[KeyCode];
-		}
-
-		inline const float GetKeyHeldDur(int KeyCode) const 
-		{
-			return m_KeyDownDuration[KeyCode];
-		}
-
-		inline const bool GetKeyHeld(int KeyCode) const
-		{
-			return m_KeyHeldOnce[KeyCode];
-		}
-		
-		inline const bool GetRepeatKeyDown(int KeyCode) const
-		{
-			return m_RepeatKeyDown[KeyCode];
 		}
 
 		inline const std::vector<unsigned char>& GetPressedKeys() const { return m_PressedKeys; }
@@ -262,7 +249,7 @@ namespace IO
 				}
 			}
 		}
-
+		
 		inline void ChangeHoldTime(float seconds) { m_HoldTime = seconds; }
 
 
@@ -281,24 +268,22 @@ namespace IO
 		bool m_KeyHeld[256];
 		bool m_KeyHeldPrev[256];
 		bool m_KeyHeldOnce[256];
-
+		
 		bool m_RepeatKeyDown[256]; // Key type that detects single key press... waits a little bit and then sends them as fast as possible
-
+		
 		float m_KeyDownDuration[256];
+		float m_KeyDownIntrevelDuration[256];
 
 		std::vector<unsigned char> m_PressedKeys;
 
 		std::chrono::steady_clock::time_point m_Start;
+		
 
-		inline const void m_GetKeys(unsigned char arr[]) const
-		{
-			GetKeyState(0); GetKeyboardState(arr);
-		}
+		inline const void m_GetKeys(unsigned char arr[]) const 
+			{ GetKeyState(0); GetKeyboardState(arr); }
 
-		inline const std::chrono::duration<float> m_GetTime(const std::chrono::steady_clock::time_point& start, const std::chrono::steady_clock::time_point& end)
-		{
-			return end - start;
-		}
+		inline const std::chrono::duration<float> m_GetTime(const std::chrono::steady_clock::time_point& start, const std::chrono::steady_clock::time_point& end) 
+			{ return end - start; }
 	};
 
 }
