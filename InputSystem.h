@@ -5,10 +5,6 @@
 #include <chrono>
 #include <vector>
 
-#ifdef __DEBUG__
-#include <iostream>
-#endif
-
 namespace IO
 {
 	class Input
