@@ -91,7 +91,8 @@ namespace IO
 				{
 					m_KeyHeld[i] = false;
 					m_KeyDown[i] = false;
-
+					m_KeyPressed[i] = false;
+					
 					m_RepeatKeyDown[i] = false;
 
 					m_KeyDownDuration[i] = 0.0f;
